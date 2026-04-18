@@ -18,8 +18,8 @@ To run the server, please execute the following from the root directory:
 uv venv venv
 venv\Scripts\activate
 uv pip install -r requirements.txt
-cd src/ai_travel_planner
-python main.py
+cd src/
+python -m ai_travel_planner.main
 ```
 
 and open your browser at `http://localhost:8080/docs/` to see the docs.
