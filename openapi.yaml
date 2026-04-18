@@ -1,0 +1,393 @@
+openapi: 3.1.0
+info:
+  title: AI Travel Planner API
+  version: 1.0.0
+servers:
+- url: https://api.travelplanner.com/v1
+- url: http://localhost:8000/v1
+paths:
+  /plan:
+    post:
+      operationId: createPlan
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePlanRequest"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatePlanResponse"
+          description: Accepted
+      summary: Submit a new travel request
+  /plan/{id}:
+    get:
+      operationId: getPlan
+      parameters:
+      - $ref: "#/components/parameters/PlanId"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanResponse"
+          description: OK
+      summary: Get plan status and draft
+  /plan/{id}/review:
+    post:
+      operationId: reviewPlan
+      parameters:
+      - $ref: "#/components/parameters/PlanId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanResponse"
+          description: Updated plan
+      summary: Submit HITL feedback
+  /plan/{id}/final:
+    get:
+      operationId: getFinalPlan
+      parameters:
+      - $ref: "#/components/parameters/PlanId"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinalPlanResponse"
+          description: Final itinerary
+      summary: Get finalized plan
+components:
+  parameters:
+    PlanId:
+      explode: false
+      in: path
+      name: id
+      required: true
+      schema:
+        format: uuid
+        type: string
+      style: simple
+  schemas:
+    CreatePlanRequest:
+      example:
+        end_date: 2000-01-23
+        destination: destination
+        interests:
+        - interests
+        - interests
+        travelers: 1
+        start_date: 2000-01-23
+        budget:
+          min: 0.8008281904610115
+          max: 6.027456183070403
+          currency: currency
+      properties:
+        destination:
+          title: destination
+          type: string
+        start_date:
+          format: date
+          title: start_date
+          type: string
+        end_date:
+          format: date
+          title: end_date
+          type: string
+        budget:
+          $ref: "#/components/schemas/Budget"
+        interests:
+          items:
+            type: string
+          title: interests
+          type: array
+        travelers:
+          minimum: 1
+          title: travelers
+          type: integer
+      required:
+      - budget
+      - destination
+      - end_date
+      - start_date
+      - travelers
+      title: CreatePlanRequest
+    Budget:
+      example:
+        min: 0.8008281904610115
+        max: 6.027456183070403
+        currency: currency
+      properties:
+        currency:
+          title: currency
+          type: string
+        min:
+          title: min
+          type: number
+        max:
+          title: max
+          type: number
+      required:
+      - currency
+      - max
+      - min
+      title: Budget
+    CreatePlanResponse:
+      example:
+        plan_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        status: pending
+      properties:
+        plan_id:
+          format: uuid
+          title: plan_id
+          type: string
+        status:
+          $ref: "#/components/schemas/PlanStatus"
+      title: CreatePlanResponse
+    PlanResponse:
+      example:
+        stage: intake
+        draft_itinerary:
+          destination: destination
+          days:
+          - date: 2000-01-23
+            activities:
+            - estimated_cost: 6.027456183070403
+              description: description
+              location: location
+              time: time
+              title: title
+            - estimated_cost: 6.027456183070403
+              description: description
+              location: location
+              time: time
+              title: title
+            day: 0
+          - date: 2000-01-23
+            activities:
+            - estimated_cost: 6.027456183070403
+              description: description
+              location: location
+              time: time
+              title: title
+            - estimated_cost: 6.027456183070403
+              description: description
+              location: location
+              time: time
+              title: title
+            day: 0
+        plan_id: plan_id
+        status: pending
+      properties:
+        plan_id:
+          title: plan_id
+          type: string
+        status:
+          $ref: "#/components/schemas/PlanStatus"
+        stage:
+          $ref: "#/components/schemas/WorkflowStage"
+        draft_itinerary:
+          $ref: "#/components/schemas/Itinerary"
+      title: PlanResponse
+    FinalPlanResponse:
+      example:
+        final_itinerary:
+          destination: destination
+          days:
+          - date: 2000-01-23
+            activities:
+            - estimated_cost: 6.027456183070403
+              description: description
+              location: location
+              time: time
+              title: title
+            - estimated_cost: 6.027456183070403
+              description: description
+              location: location
+              time: time
+              title: title
+            day: 0
+          - date: 2000-01-23
+            activities:
+            - estimated_cost: 6.027456183070403
+              description: description
+              location: location
+              time: time
+              title: title
+            - estimated_cost: 6.027456183070403
+              description: description
+              location: location
+              time: time
+              title: title
+            day: 0
+        plan_id: plan_id
+        status: approved
+      properties:
+        plan_id:
+          title: plan_id
+          type: string
+        status:
+          enum:
+          - approved
+          title: status
+          type: string
+        final_itinerary:
+          $ref: "#/components/schemas/Itinerary"
+      title: FinalPlanResponse
+    ReviewRequest:
+      example:
+        comments: comments
+        action: approve
+        modifications:
+          key: ""
+      properties:
+        action:
+          enum:
+          - approve
+          - reject
+          - modify
+          title: action
+          type: string
+        comments:
+          title: comments
+          type: string
+        modifications:
+          additionalProperties: true
+          title: modifications
+          type: object
+      required:
+      - action
+      title: ReviewRequest
+    PlanStatus:
+      enum:
+      - pending
+      - researching
+      - planning
+      - awaiting_review
+      - revising
+      - approved
+      - failed
+      title: PlanStatus
+      type: string
+    WorkflowStage:
+      enum:
+      - intake
+      - research
+      - itinerary_generation
+      - hitl_review
+      - revision
+      - finalized
+      title: WorkflowStage
+      type: string
+    Itinerary:
+      example:
+        destination: destination
+        days:
+        - date: 2000-01-23
+          activities:
+          - estimated_cost: 6.027456183070403
+            description: description
+            location: location
+            time: time
+            title: title
+          - estimated_cost: 6.027456183070403
+            description: description
+            location: location
+            time: time
+            title: title
+          day: 0
+        - date: 2000-01-23
+          activities:
+          - estimated_cost: 6.027456183070403
+            description: description
+            location: location
+            time: time
+            title: title
+          - estimated_cost: 6.027456183070403
+            description: description
+            location: location
+            time: time
+            title: title
+          day: 0
+      properties:
+        destination:
+          title: destination
+          type: string
+        days:
+          items:
+            $ref: "#/components/schemas/DayPlan"
+          title: days
+          type: array
+      title: Itinerary
+    DayPlan:
+      example:
+        date: 2000-01-23
+        activities:
+        - estimated_cost: 6.027456183070403
+          description: description
+          location: location
+          time: time
+          title: title
+        - estimated_cost: 6.027456183070403
+          description: description
+          location: location
+          time: time
+          title: title
+        day: 0
+      properties:
+        day:
+          title: day
+          type: integer
+        date:
+          format: date
+          title: date
+          type: string
+        activities:
+          items:
+            $ref: "#/components/schemas/Activity"
+          title: activities
+          type: array
+      title: DayPlan
+    Activity:
+      example:
+        estimated_cost: 6.027456183070403
+        description: description
+        location: location
+        time: time
+        title: title
+      properties:
+        time:
+          title: time
+          type: string
+        title:
+          title: title
+          type: string
+        description:
+          title: description
+          type: string
+        location:
+          title: location
+          type: string
+        estimated_cost:
+          title: estimated_cost
+          type: number
+      title: Activity
+    Error:
+      properties:
+        message:
+          title: comments
+          type: string
+        code:
+          title: comments
+          type: string
