@@ -76,8 +76,8 @@ uv venv venv
 uv pip install -r requirements.txt
 
 # 5. Run
-cd src/ai_travel_planner
-python main.py
+cd src/
+python -m ai_travel_planner.main
 ```
 
 > [!IMPORTANT]
