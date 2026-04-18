@@ -76,8 +76,8 @@ class DefaultApiImpl(BaseDefaultApi):
         if result is None:
             raise HTTPException(status_code=404, detail="Plan not found")
 
-        if "error" in result and result.get("status") != "approved":
-            raise HTTPException(status_code=409, detail=result["error"])
+        if result.get("error"):
+            raise HTTPException(status_code=409, detail=result.get("error"))
 
         draft = None
         if result.get("draft_itinerary"):
@@ -97,8 +97,8 @@ class DefaultApiImpl(BaseDefaultApi):
         if result is None:
             raise HTTPException(status_code=404, detail="Plan not found")
 
-        if "error" in result:
-            raise HTTPException(status_code=409, detail=result["error"])
+        if result.get("error"):
+            raise HTTPException(status_code=409, detail=result.get("error"))
 
         final_itin = None
         if result.get("final_itinerary"):
